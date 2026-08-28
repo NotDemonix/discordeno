@@ -312,10 +312,17 @@ export function createGatewayManager(options: CreateGatewayManagerOptions): Gate
           return;
         }
 
-        gateway.resharding.checkIntervalId = setInterval(async () => {
-          const reshardingInfo = await gateway.resharding.checkIfReshardingIsNeeded();
+        gateway.resharding.checkIntervalId = setInterval(() => {
+          // The promise of the callback is not awaited by the timer, so it has to handle its own errors, otherwise a single failed check terminates the process.
+          void (async () => {
+            try {
+              const reshardingInfo = await gateway.resharding.checkIfReshardingIsNeeded();
 
-          if (reshardingInfo.needed && reshardingInfo.info) await gateway.resharding.reshard(reshardingInfo.info);
+              if (reshardingInfo.needed && reshardingInfo.info) await gateway.resharding.reshard(reshardingInfo.info);
+            } catch (error) {
+              gateway.logger.error('[Resharding] The resharding check failed, it will be retried at the next interval.', error);
+            }
+          })();
         }, gateway.resharding.checkInterval);
       }
     },
@@ -426,11 +433,7 @@ export function createGatewayManager(options: CreateGatewayManagerOptions): Gate
     async editBotStatus(data) {
       gateway.logger.debug(`[Gateway] editBotStatus data: ${JSON.stringify(data, jsonSafeReplacer)}`);
 
-      await Promise.all(
-        [...gateway.shards.values()].map(async (shard) => {
-          gateway.editShardStatus(shard.id, data);
-        }),
-      );
+      await Promise.all([...gateway.shards.values()].map((shard) => gateway.editShardStatus(shard.id, data)));
     },
 
     async editShardStatus(shardId, data) {

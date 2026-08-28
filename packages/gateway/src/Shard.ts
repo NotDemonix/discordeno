@@ -494,9 +494,10 @@ export class DiscordenoShard {
         return null;
       }
 
+      // The promise is abandoned when a partial frame returns early, so it needs to handle its own errors.
       const writePromise = new Promise<void>((resolve, reject) => {
         this.inflate!.write(compressedData, 'binary', (error) => (error ? reject(error) : resolve()));
-      });
+      }).catch((error) => this.logger.error('[Shard] There was an error writing to the decompression stream', error));
 
       if (this.gatewayConfig.transportCompression === TransportCompression.zlib && !endsWithMarker(compressedData, ZLIB_SYNC_FLUSH)) return null;
 
