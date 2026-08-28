@@ -20,7 +20,7 @@ export class LeakyBucket implements LeakyBucketOptions {
   logger: Pick<typeof logger, 'debug' | 'info' | 'warn' | 'error' | 'fatal'>;
 
   constructor(options?: LeakyBucketOptions) {
-    this.max = options?.max ?? 1;
+    this.max = Math.max(1, options?.max ?? 1);
     this.refillAmount = options?.refillAmount ? (options.refillAmount > this.max ? this.max : options.refillAmount) : 1;
     this.refillInterval = options?.refillInterval ?? 5000;
     this.logger = options?.logger ?? logger;
@@ -95,6 +95,11 @@ export class LeakyBucket implements LeakyBucketOptions {
           this.logger.debug(`[LeakyBucket] Delaying execution of leaky bucket requests for 1000ms`);
           await delay(1000);
         }
+      }
+
+      // Nothing can be processed and no refill is scheduled, wait for the next interval instead of spinning.
+      else {
+        await delay(this.refillInterval);
       }
     }
 
