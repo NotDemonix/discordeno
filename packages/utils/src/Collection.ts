@@ -38,9 +38,10 @@ export class Collection<K, V> extends Map<K, V> {
   }
 
   stopSweeper(): void {
-    clearInterval(this.sweeper?.intervalId);
+    if (!this.sweeper) return;
 
-    if (this.sweeper) this.sweeper.intervalId = undefined;
+    clearInterval(this.sweeper.intervalId);
+    this.sweeper.intervalId = undefined;
   }
 
   changeSweeperInterval(newInterval: number): void {
