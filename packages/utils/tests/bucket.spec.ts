@@ -190,32 +190,6 @@ describe('bucket.ts', () => {
       expect(bucket.remaining).to.equal(1);
     });
 
-    it('will not spin the event loop when nothing can be processed and no refill is scheduled', async () => {
-      const bucket = new LeakyBucket({ max: 1, refillInterval: 500, refillAmount: 1 });
-      // Nothing is available and no refill has been scheduled, so neither branch of the queue loop applies
-      bucket.used = 5;
-
-      // The queue length is read once per iteration, so bail out instead of letting a regression hang the process
-      let reads = 0;
-      bucket.queue = new Proxy([() => {}], {
-        get(target, property, receiver) {
-          if (property === 'length' && ++reads > 100) throw new Error('processQueue looped without awaiting');
-
-          return Reflect.get(target, property, receiver);
-        },
-      });
-
-      let error: unknown;
-      void bucket.processQueue().catch((err) => {
-        error = err;
-      });
-
-      await Promise.resolve();
-
-      expect(error).to.equal(undefined);
-      expect(reads).to.be.lessThan(100);
-    });
-
     it("Don't process queue twice", () => {
       const bucket = new LeakyBucket({
         max: 1,

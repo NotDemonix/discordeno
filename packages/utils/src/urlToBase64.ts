@@ -7,9 +7,7 @@ export async function urlToBase64(url: string): Promise<string> {
   if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
 
   const imageStr = encode(await response.arrayBuffer());
-  const contentType = response.headers.get('content-type')?.split(';')[0];
-  const pathname = new URL(url).pathname;
-  const type = pathname.includes('.') ? pathname.substring(pathname.lastIndexOf('.') + 1) : 'png';
+  const type = url.substring(url.lastIndexOf('.') + 1);
 
-  return `data:${contentType || `image/${type}`};base64,${imageStr}`;
+  return `data:image/${type};base64,${imageStr}`;
 }

@@ -96,11 +96,6 @@ export class LeakyBucket implements LeakyBucketOptions {
           await delay(1000);
         }
       }
-
-      // Nothing can be processed and no refill is scheduled, wait for the next interval instead of spinning.
-      else {
-        await delay(this.refillInterval);
-      }
     }
 
     // Loop has ended mark false so it can restart later when needed
