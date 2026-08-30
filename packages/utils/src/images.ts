@@ -321,14 +321,18 @@ export function stickerPackBannerUrl(bannerAssetId: BigString | undefined, optio
  * @returns The link to the resource or `undefined`.
  *
  * @remarks
- * Stickers are only available as `png`, `json` (Lottie) and `gif`, and the size parameter is ignored by Discord for stickers.
+ * Stickers are only available as `png`, `json` (Lottie) and `gif`.
  */
 export function stickerUrl(stickerId: BigString | number, options?: ImageOptions & { type?: StickerFormatTypes }): string | undefined {
   if (!stickerId) return;
 
-  if (options?.type === StickerFormatTypes.Gif) return `https://media.discordapp.net/stickers/${stickerId}.${options.format ?? 'gif'}`;
+  if (options?.type === StickerFormatTypes.Gif) return `https://media.discordapp.net/stickers/${stickerId}.gif`;
 
-  return `https://cdn.discordapp.com/stickers/${stickerId}.${options?.format ?? (options?.type === StickerFormatTypes.Lottie ? 'json' : 'png')}`;
+  return formatImageUrl(
+    `https://cdn.discordapp.com/stickers/${stickerId}`,
+    options?.size ?? 128,
+    options?.format ?? (options?.type === StickerFormatTypes.Lottie ? 'json' : 'png'),
+  );
 }
 
 /**
@@ -376,7 +380,7 @@ export function roleIconUrl(roleId: BigString, iconHash: BigString | undefined, 
  * @returns The link to the resource or `undefined` if no badge has been set.
  */
 export function guildTagBadgeUrl(guildId: BigString, badgeHash: BigString | undefined, options?: ImageOptions): string | undefined {
-  if (!badgeHash) return undefined;
+  if (badgeHash === undefined) return undefined;
 
   return formatImageUrl(
     `https://cdn.discordapp.com/guild-tag-badges/${guildId}/${typeof badgeHash === 'string' ? badgeHash : iconBigintToHash(badgeHash)}`,

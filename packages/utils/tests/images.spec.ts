@@ -196,12 +196,12 @@ describe('images.ts', () => {
 
   describe('stickerUrl function', () => {
     it('will return the url with png as the default extension', () => {
-      expect(stickerUrl('1228092333061443654')).to.equal('https://cdn.discordapp.com/stickers/1228092333061443654.png');
+      expect(stickerUrl('1228092333061443654')).to.equal('https://cdn.discordapp.com/stickers/1228092333061443654.png?size=128');
     });
 
     it('will return the url with json as the extension for lottie stickers', () => {
       expect(stickerUrl('749054660769218631', { type: StickerFormatTypes.Lottie })).to.equal(
-        'https://cdn.discordapp.com/stickers/749054660769218631.json',
+        'https://cdn.discordapp.com/stickers/749054660769218631.json?size=128',
       );
     });
 
@@ -212,7 +212,7 @@ describe('images.ts', () => {
     });
 
     it('will return the url with the given format', () => {
-      expect(stickerUrl('1228092333061443654', { format: 'png' })).to.equal('https://cdn.discordapp.com/stickers/1228092333061443654.png');
+      expect(stickerUrl('1228092333061443654', { format: 'png' })).to.equal('https://cdn.discordapp.com/stickers/1228092333061443654.png?size=128');
     });
 
     it('will return undefined without given sticker id', () => {
